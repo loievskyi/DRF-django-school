@@ -10,8 +10,8 @@ from .models import (
 
 class MovieAdminForm(forms.ModelForm):
     """Форма с виджетом ckeditor"""
-    description = forms.CharField(label="Описание", 
-                                     widget=CKEditorUploadingWidget())
+    description = forms.CharField(label="Описание")
+                                  # widget=CKEditorUploadingWidget())
 
     class Meta:
         model = Movie

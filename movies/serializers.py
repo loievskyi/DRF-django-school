@@ -1,4 +1,5 @@
 from rest_framework import serializers
+# from rest_framework_recursive.fields import RecursiveField
 
 from .models import Movie, Review
 
@@ -11,12 +12,28 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class RecursiveSerializer(serializers.Serializer):
+    """Retrieving children recursively"""
+    def to_representation(self, value):
+        serializer = self.parent.parent.__class__(value, context=self.context)
+        return serializer.data
+
+
+class FilterReviewListSerializer(serializers.ListSerializer):
+    """reviews filter, parents only"""
+    def to_representation(self, data):
+        data = data.filter(parent=None)
+        return super().to_representation(data)
+
+
 class ReviewSerializer(serializers.ModelSerializer):
     """Retrieving a view"""
+    children = RecursiveSerializer(many=True)
 
     class Meta:
+        list_serializer_class = FilterReviewListSerializer
         model = Review
-        fields = ("name", "text", "parent")
+        fields = ("id", "name", "text", "children")
 
 
 class MovieListSerialiser(serializers.ModelSerializer):
@@ -24,7 +41,7 @@ class MovieListSerialiser(serializers.ModelSerializer):
 
     class Meta:
         model = Movie
-        fields = ("title", "tagline", "category")
+        fields = ("id", "title", "tagline", "category")
 
 
 class MovieDetailSerialiser(serializers.ModelSerializer):
